@@ -1,0 +1,45 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+os.getcwd()
+os.chdir("C:/Users/liash/OneDrive/Desktop/Spyder")
+data=pd.read_csv("loan_approval_dataset.csv")
+data.dtypes
+data.isnull().sum()
+
+import scipy.stats
+chisqt2=pd.crosstab(data[' loan_status'],data[' self_employed'],margins=True)
+chi2_stat,p,dof,expected=scipy.stats.chi2_contingency(chisqt2)
+print(chisqt2)
+
+chisqt1=pd.crosstab(data[' loan_status'],data[' education'],margins=True)
+chi1_stat,p,dof,expected=scipy.stats.chi2_contingency(chisqt1)
+print(chisqt1)
+
+import pingouin as pg
+data.anova(dv=" no_of_dependents", between=" loan_status")
+data.anova(dv=" income_annum",between=' loan_status')
+data.anova(dv=" loan_amount",between=' loan_status')
+data.anova(dv=" loan_term",between=' loan_status')
+data.anova(dv=" cibil_score",between=' loan_status')
+data.anova(dv=" residential_assets_value",between=' loan_status')
+data.anova(dv=" commercial_assets_value",between=' loan_status')
+data.anova(dv=" luxury_assets_value",between=' loan_status')
+data.anova(dv=" bank_asset_value",between=' loan_status')
+x=data[[" cibil_score"," loan_term"]]
+x
+y=data[[' loan_status']]
+y
+
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest=train_test_split(x,y,test_size=0.20,random_state=0)
+print(xtrain.shape)
+print(xtest.shape)
+
+from sklearn.tree import DecisionTreeClassifier
+model=DecisionTreeClassifier(criterion='entropy',max_depth=3,random_state=0)
+model.fit(xtrain,ytrain)
+y_pred=model.predict(xtest)
+from sklearn.metrics import accuracy_score
+print(accuracy_score(ytest,y_pred)*100)
