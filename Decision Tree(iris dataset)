@@ -1,0 +1,20 @@
+from sklearn.datasets import load_iris
+import pandas as pd
+import numpy as np
+dataset=load_iris()
+y=dataset.target 
+y
+x=pd.DataFrame(dataset.data,columns=dataset.feature_names)
+x
+
+from sklearn.model_selection import train_test_split
+xtrain,xtest,ytrain,ytest=train_test_split(x,y,test_size=0.20,random_state=0)
+print(xtrain.shape)
+print(xtest.shape)
+
+from sklearn.tree import DecisionTreeClassifier
+model=DecisionTreeClassifier(criterion='entropy',max_depth=3,random_state=0)
+model.fit(xtrain,ytrain)
+y_pred=model.predict(xtest)
+from sklearn.metrics import accuracy_score
+print(accuracy_score(ytest,y_pred)*100)
