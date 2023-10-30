@@ -1,0 +1,235 @@
+import os
+os.getcwd()
+os.chdir("C:/Users/liash/OneDrive/Desktop/Machine_learning lab")
+
+import pandas as pd
+import numpy as np
+import pingouin as pg
+
+filepath="C:/Users/liash/OneDrive/Desktop/Machine_learning lab/CST_level_Data.csv"
+dataset=pd.read_csv(filepath)
+
+columns_to_drop = [0,1, 8, 10]
+dataset.drop(dataset.columns[columns_to_drop], axis=1, inplace=True)
+
+dataset.info()
+dataset.isnull().sum()
+
+# List of column names
+columns_to_check = ['I_LM', 'A1_LM', 'A2_LM', 'A3_LM','A4_LM','A5_LM','A6_LM','A7_LM','A8_LM','A9_LM','A10_LM','A11_LM','A12_LM','A13_LM','A14_LM','A15_LM','A16_LM','A17_LM','A18_LM']  # Add your 18 column names here
+
+# Iterate over the columns
+for column_name in columns_to_check:
+    non_numeric_rows = dataset[pd.to_numeric(dataset[column_name], errors='coerce').isna()]
+    if not non_numeric_rows.empty:
+        print(f"The column '{column_name}' contains non-numeric values in rows:")
+        for index in non_numeric_rows.index:
+            print(f"Row {index}: {non_numeric_rows.at[index, column_name]}")
+    else:
+        print(f"The column '{column_name}' contains only numeric values.")
+
+dataset.loc[[14, 19, 269], 'I_LM'] = dataset.loc[[14, 19, 269], 'I_LM'].str.replace(',', '')
+dataset['I_LM'] = pd.to_numeric(dataset['I_LM'], errors='coerce')
+
+dataset.loc[[268, 49797], 'A1_LM'] = dataset.loc[[268, 49797], 'A1_LM'].str.replace(',', '')
+dataset['A1_LM'] = pd.to_numeric(dataset['A1_LM'], errors='coerce')
+
+dataset.at[178516, 'A2_LM'] = 350000
+dataset.at[8, 'A5_LM'] = 70022
+
+mean_value = dataset['A7_LM'].mean()
+mean_value_int = int(mean_value)
+dataset['A7_LM'].fillna(mean_value_int, inplace=True)
+
+dataset.loc[[19], 'A12_LM'] = dataset.loc[[19], 'A12_LM'].str.replace(',', '')
+dataset['A12_LM'] = pd.to_numeric(dataset['A12_LM'], errors='coerce')
+
+dataset['A14_LM'] = pd.to_numeric(dataset['A14_LM'], errors='coerce')
+mean_value = dataset['A14_LM'].mean()
+mean_value_int = int(mean_value)
+dataset['A14_LM'].fillna(mean_value, inplace=True)
+#dataset.loc[[18], 'A14_LM'] = dataset.loc[[18], 'A14_LM'].str.replace(',', '')
+dataset.at[18, 'A14_LM'] = str(dataset.at[18, 'A14_LM']).replace(',', '')
+dataset['A14_LM'] = pd.to_numeric(dataset['A14_LM'], errors='coerce')
+
+dataset['A18_LM'] = pd.to_numeric(dataset['A18_LM'], errors='coerce')
+mean_value = dataset['A18_LM'].mean()
+mean_value_int = int(mean_value)
+dataset['A18_LM'].fillna(mean_value, inplace=True)
+
+dataset['A2_LM'] = pd.to_numeric(dataset['A2_LM'], errors='coerce')
+dataset['A5_LM'] = pd.to_numeric(dataset['A5_LM'], errors='coerce')
+dataset.isnull().sum()
+
+
+asset_level_counts = dataset['ASSET_LEVEL'].value_counts()
+print(asset_level_counts)
+
+dataset['ASSET_LEVEL'] = dataset['ASSET_LEVEL'].replace('?', np.nan)
+# Fill missing values with the next valid observation (backfill)
+dataset['ASSET_LEVEL'].fillna(method='bfill', inplace=True)
+
+edu_level_counts = dataset['EDUCATION_LEVEL'].value_counts()
+print(edu_level_counts)
+dataset['EDUCATION_LEVEL'].fillna(method='bfill', inplace=True)
+
+plt.figure(figsize=(8, 6))
+edu_level_counts.plot(kind="bar", color="skyblue")
+plt.title("Education Level Distribution")
+plt.xlabel("Education Level")
+plt.ylabel("Count")
+plt.xticks(rotation=45)  # Rotate x-axis labels for better visibility
+plt.show()
+
+q1_counts = dataset['RATING_Q1'].value_counts()
+print(q1_counts)
+dataset['RATING_Q1'].fillna(method='bfill', inplace=True)
+
+q2_counts = dataset['RATING_Q2'].value_counts()
+print(q2_counts)
+dataset['RATING_Q2'].fillna(method='bfill', inplace=True)
+
+q3_counts = dataset['RATING_Q3'].value_counts()
+print(q3_counts)
+dataset['RATING_Q3'].fillna(method='bfill', inplace=True)
+
+q4_counts = dataset['RATING_Q4'].value_counts()
+print(q4_counts)
+dataset['RATING_Q4'].fillna(method='bfill', inplace=True)
+
+dataset.isnull().sum()
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+# Visualize the data before removing outliers
+plt.figure(figsize=(30, 20))
+plt.subplot(1, 2, 1)
+sns.boxplot(data=dataset)
+plt.title('Data with Outliers')
+plt.tight_layout()
+
+dataset["Y/N"].value_counts()
+dataset['Y/N'] = dataset['Y/N'].str.upper()
+
+dataset['Y/N'] = dataset['Y/N'].apply(lambda x: 1 if x == 'Y' else 0)
+
+pg.anova(data=dataset,dv='Y/N',between='I_LM')
+pg.anova(data=dataset,dv='Y/N',between='A1_LM')
+pg.anova(data=dataset,dv='Y/N',between='A2_LM')
+pg.anova(data=dataset,dv='Y/N',between='A3_LM')
+pg.anova(data=dataset,dv='Y/N',between='A4_LM')
+pg.anova(data=dataset,dv='Y/N',between='A5_LM')
+pg.anova(data=dataset,dv='Y/N',between='A6_LM')
+pg.anova(data=dataset,dv='Y/N',between='A7_LM')
+pg.anova(data=dataset,dv='Y/N',between='A8_LM')
+pg.anova(data=dataset,dv='Y/N',between='A9_LM')
+pg.anova(data=dataset,dv='Y/N',between='A10_LM')
+pg.anova(data=dataset,dv='Y/N',between='A11_LM')
+pg.anova(data=dataset,dv='Y/N',between='A12_LM')
+pg.anova(data=dataset,dv='Y/N',between='A13_LM')
+pg.anova(data=dataset,dv='Y/N',between='A14_LM')
+pg.anova(data=dataset,dv='Y/N',between='A15_LM')
+pg.anova(data=dataset,dv='Y/N',between='A16_LM')
+pg.anova(data=dataset,dv='Y/N',between='A17_LM')
+pg.anova(data=dataset,dv='Y/N',between='A18_LM')
+
+pg.anova(data=dataset,dv='Y/N',between="EDUCATION_LEVEL")
+
+from scipy.stats import chi2_contingency
+contingency_table_asset_level = pd.crosstab(dataset['ASSET_LEVEL'], dataset['Y/N'])
+chi2, p, dof, expected = chi2_contingency(contingency_table_asset_level)
+print(f"P-value: {p}")
+
+contingency_table_edu_level = pd.crosstab(dataset['EDUCATION_LEVEL'], dataset['Y/N'])
+chi2, p, dof, expected = chi2_contingency(contingency_table_edu_level)
+print(f"P-value: {p}")
+
+contingency_table_q1 = pd.crosstab(dataset['RATING_Q1'], dataset['Y/N'])
+chi2, p, dof, expected = chi2_contingency(contingency_table_q1)
+print(f"P-value: {p}")
+
+contingency_table_q2 = pd.crosstab(dataset['RATING_Q2'], dataset['Y/N'])
+chi2, p, dof, expected = chi2_contingency(contingency_table_q2)
+print(f"P-value: {p}")
+
+contingency_table_q3 = pd.crosstab(dataset['RATING_Q3'], dataset['Y/N'])
+chi2, p, dof, expected = chi2_contingency(contingency_table_q3)
+print(f"P-value: {p}")
+
+contingency_table_q4 = pd.crosstab(dataset['RATING_Q4'], dataset['Y/N'])
+chi2, p, dof, expected = chi2_contingency(contingency_table_q4)
+print(f"P-value: {p}")
+
+
+print(dataset.columns)
+#dataset=dataset.drop(['A_O_DT','ACCOUNT_NB','AGE','F_S','I_LM','A1_LM','A2_LM','A4_LM','A5_LM','A6_LM','A7_LM','A8_LM','A10_LM','A12_LM','A13_LM','A16_LM','A18_LM','ASSET_LEVEL','RATING_Q1','RATING_Q4'],axis=1)
+
+#p value of 0.1
+dataset_p=dataset.drop(['A_O_DT','ACCOUNT_NB','AGE','F_S','I_LM','A1_LM','A2_LM','A4_LM','A5_LM','A6_LM','A7_LM','A8_LM','A10_LM','A13_LM','A16_LM','A18_LM','ASSET_LEVEL','RATING_Q1','RATING_Q4'],axis=1)
+
+dataset_p.shape
+
+rating_mapping = {'S': 1, '3': 2, '0': 3, '6': 4}
+# Apply the mapping to the 'Rating' column
+dataset_p['RATING_Q2'] = dataset_p['RATING_Q2'].map(rating_mapping)
+dataset_p['RATING_Q3'] = dataset_p['RATING_Q3'].map(rating_mapping)
+
+y=dataset_p[['Y/N']]
+x=dataset_p.drop(['Y/N'],axis=1)
+
+print(x.columns)
+
+# Split the prepared data into training and testing sets
+from sklearn.model_selection import train_test_split
+xtrain, xtest, ytrain, ytest = train_test_split(x, y, test_size=0.35,random_state=0)
+
+from sklearn.linear_model import LogisticRegression
+lm=LogisticRegression()
+lm.fit(xtrain,ytrain)
+prediction_value=lm.predict(xtest)
+
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+conf_matrix = confusion_matrix(ytest, prediction_value)
+print(conf_matrix)
+#Plot the confusion matrix as a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt='g', cmap='Blues')
+
+from sklearn.metrics import accuracy_score
+accuracy = accuracy_score(ytest, prediction_value)
+print(accuracy)
+
+from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier(class_weight='balanced', random_state=42)
+model.fit(xtrain,ytrain)
+prediction=model.predict(xtest)
+print(confusion_matrix(ytest, prediction))
+
+from sklearn.metrics import classification_report
+print(classification_report(ytest,prediction))
+
+accuracy = accuracy_score(ytest, prediction)
+print(accuracy)
+
+ytrain.value_counts()
+ytest.value_counts()
+
+from sklearn.tree import DecisionTreeClassifier
+dt_classifier = DecisionTreeClassifier(random_state=42)
+dt_classifier.fit(xtrain, ytrain)
+predictions12 = dt_classifier.predict(xtest)
+
+# Calculate accuracy
+accuracy = accuracy_score(ytest, predictions12)
+print("Accuracy:", accuracy)
+
+# Print a classification report for more detailed evaluation
+print(classification_report(ytest, predictions12))
+confusion_matrix_result = confusion_matrix(ytest, predictions12)
+print("Confusion Matrix:")
+print(confusion_matrix_result)
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(confusion_matrix_result, annot=True, fmt='g', cmap='Blues')
