@@ -1,0 +1,20 @@
+import nltk
+import pandas as pd
+df=pd.read_csv("C:/Users/liash/OneDrive/Desktop/Spyder/customer_reviews.csv")
+
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+sent_analyzer=SentimentIntensityAnalyzer()
+
+sent_analyzer.polarity_scores(df.iloc[50,1])
+print(df.iloc[50,1])
+
+df.info()
+df["score"]=df["text"].apply(lambda x: sent_analyzer.polarity_scores(x))
+df["compound_score"]=df["score"].apply(lambda x:x ["compound"])
+
+import numpy as np
+df["positive_negetive"]=df["compound_score"].apply(lambda x: np.where(x>0,"Positive","Negetive"))
+
+df["positive_negetive"].value_counts()
+pos_data=df.query("positive_negetive == 'Positive'")
+nge_data=df.query("positive_negetive == 'PNegetive'")
